@@ -3,6 +3,7 @@ package org.example.main;
 import org.example.mino.*;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class PlayManager {
@@ -19,6 +20,10 @@ public class PlayManager {
     Mino currentMino;
     final int MINO_START_X;
     final int MINO_START_Y;
+    Mino nextMino;
+    final int NEXTMINO_X;
+    final int NEXTMINO_Y;
+    public static ArrayList<Block> staticBlocks = new ArrayList<>();
 
     // Others
     public static int dropInterval = 60;
@@ -34,8 +39,13 @@ public class PlayManager {
         MINO_START_X = left_x + (WIDTH/2) - Block.SIZE;
         MINO_START_Y = top_y + Block.SIZE;
 
+        NEXTMINO_X = right_x + 175;
+        NEXTMINO_Y = top_y + 500;
+
         currentMino = pickMino();
         currentMino.setXY(MINO_START_X,MINO_START_Y);
+        nextMino = pickMino();
+        nextMino.setXY(NEXTMINO_X,NEXTMINO_Y);
     }
     private Mino pickMino(){
 
@@ -55,7 +65,27 @@ public class PlayManager {
         return mino;
     }
     public void update() {
-        currentMino.update();
+
+        // Check if the currentMino is active
+        if (currentMino.active == false) {
+
+            // if the mino is not active, put it into the staticBlocks
+            staticBlocks.add(currentMino.b[0]);
+            staticBlocks.add(currentMino.b[1]);
+            staticBlocks.add(currentMino.b[2]);
+            staticBlocks.add(currentMino.b[3]);
+
+            currentMino.deactivating = false;
+
+            // Replace the currentMino with the nextMino
+            currentMino = nextMino;
+            currentMino.setXY(MINO_START_X,MINO_START_Y);
+            nextMino = pickMino();
+            nextMino.setXY(NEXTMINO_X,NEXTMINO_Y);
+        } else {
+            currentMino.update();
+        }
+
     }
     public void draw(Graphics2D g2) {
 
@@ -75,6 +105,13 @@ public class PlayManager {
         // Draw the currentMino
         if (currentMino != null) {
             currentMino.draw(g2);
+        }
+        // Draw the nextMino
+        nextMino.draw(g2);
+
+        // Draw Static Blocks
+        for (int i = 0; i < staticBlocks.size(); i++) {
+            staticBlocks.get(i).draw(g2);
         }
 
     }
