@@ -28,6 +28,11 @@ public class PlayManager {
     // Others
     public static int dropInterval = 60;
 
+    // Effect
+    boolean effectCounterOn;
+    int effectCounter;
+    ArrayList<Integer> effectY = new ArrayList<>();
+
     public PlayManager() {
 
         // Main Play Area Frame
@@ -67,7 +72,7 @@ public class PlayManager {
     public void update() {
 
         // Check if the currentMino is active
-        if (currentMino.active == false) {
+        if (!currentMino.active) {
 
             // if the mino is not active, put it into the staticBlocks
             staticBlocks.add(currentMino.b[0]);
@@ -138,20 +143,24 @@ public class PlayManager {
         // Draw Play Area Frame
         g2.setColor(Color.white);
         g2.setStroke(new BasicStroke(4f));
-        g2.drawRect(left_x-4, top_y-4, WIDTH+8, HEIGHT+8);
+        g2.drawRect(left_x - 4, top_y - 4, WIDTH + 8, HEIGHT + 8);
 
-        //Draw Next Mino Frame
+        // Desenha o grid dentro da área de jogo
+        drawGrid(g2);
+
+        // Draw Next Mino Frame
         int x = right_x + 100;
         int y = bottom_y - 200;
-        g2.drawRect(x,y,200,200);
+        g2.drawRect(x, y, 200, 200);
         g2.setFont(new Font("Arial", Font.PLAIN, 30));
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2.drawString("Next", x+70,y+60);
+        g2.drawString("Next", x + 70, y + 60);
 
         // Draw the currentMino
         if (currentMino != null) {
             currentMino.draw(g2);
         }
+
         // Draw the nextMino
         nextMino.draw(g2);
 
@@ -159,6 +168,22 @@ public class PlayManager {
         for (int i = 0; i < staticBlocks.size(); i++) {
             staticBlocks.get(i).draw(g2);
         }
-
     }
+    private void drawGrid(Graphics2D g2) {
+        int blockSize = Block.SIZE;
+
+        g2.setColor(new Color(255, 255, 255, 50)); // Branco com transparência
+        g2.setStroke(new BasicStroke(2f));
+
+        for (int y = top_y; y <= bottom_y; y += blockSize) {
+            g2.drawLine(left_x, y, right_x, y);
+        }
+
+
+        for (int x = left_x; x <= right_x; x += blockSize) {
+            g2.drawLine(x, top_y, x, bottom_y);
+        }
+    }
+
+
 }
