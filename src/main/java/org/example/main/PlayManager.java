@@ -27,11 +27,17 @@ public class PlayManager {
 
     // Others
     public static int dropInterval = 60;
+    boolean gameOver;
 
     // Effect
     boolean effectCounterOn;
     int effectCounter;
     ArrayList<Integer> effectY = new ArrayList<>();
+
+    // Score
+    int level = 1;
+    int lines;
+    int score;
 
     public PlayManager() {
 
@@ -80,6 +86,13 @@ public class PlayManager {
             staticBlocks.add(currentMino.b[2]);
             staticBlocks.add(currentMino.b[3]);
 
+            // check if the game is over
+            if(currentMino.b[0].x == MINO_START_X && currentMino.b[0].y == MINO_START_Y){
+                // this means the currentMino immediately collided a block and couldn't move at all
+                // so it's xy are the same with the nextMino's
+                gameOver = true;
+            }
+
             currentMino.deactivating = false;
 
             // Replace the currentMino with the nextMino
@@ -100,6 +113,7 @@ public class PlayManager {
         int x = left_x;
         int y = top_y;
         int blockCount = 0;
+        int lineCount = 0;
 
         while (x < right_x && y < bottom_y) {
 
@@ -117,10 +131,27 @@ public class PlayManager {
                 // so we can delete them
                 if(blockCount == 12) {
 
+                    effectCounterOn = true;
+                    effectY.add(y);
+
                     for (int i = staticBlocks.size()-1; i > -1 ; i--) {
                         // remove all the blocks in the current y line
                         if (staticBlocks.get(i).y == y) {
                             staticBlocks.remove(i);
+                        }
+                    }
+                    lineCount++;
+                    lines++;
+                    // Drop Speed
+                    // if the line score hits a certain number, increase the drop speed
+                    // 1 is the fastest
+                    if (lines % 10 == 0 && dropInterval > 1) {
+
+                        level++;
+                        if (dropInterval > 10) {
+                            dropInterval -= 10;
+                        } else {
+                            dropInterval -= 1;
                         }
                     }
 
@@ -137,6 +168,11 @@ public class PlayManager {
                 y += Block.SIZE;
             }
         }
+            // Add Score
+            if (lineCount > 0) {
+                int singleLineScore = 10 * level;
+                score += singleLineScore * lineCount;
+            }
     }
     public void draw(Graphics2D g2) {
 
@@ -156,6 +192,14 @@ public class PlayManager {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.drawString("Next", x + 70, y + 60);
 
+        // Draw Score Frame
+        g2.drawRect(x,top_y , 250, 300);
+        x += 40;
+        y = top_y + 90;
+        g2.drawString("LEVEL: " + level, x, y); y+=70;
+        g2.drawString("LINES: " + lines, x, y); y+=70;
+        g2.drawString("SCORE: " + score, x, y);
+
         // Draw the currentMino
         if (currentMino != null) {
             currentMino.draw(g2);
@@ -168,6 +212,35 @@ public class PlayManager {
         for (int i = 0; i < staticBlocks.size(); i++) {
             staticBlocks.get(i).draw(g2);
         }
+
+        // Draw Effect
+        if (effectCounterOn) {
+            effectCounter++;
+
+            g2.setColor(Color.white);
+            for (int i = 0; i < effectY.size(); i++) {
+                g2.fillRect(left_x, effectY.get(i), WIDTH, Block.SIZE);
+            }
+
+            if(effectCounter == 10) {
+                effectCounterOn = false;
+                effectCounter = 0;
+                effectY.clear();
+            }
+        }
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(50f));
+        if (gameOver) {
+            x = left_x + 25;
+            y = top_y + 320;
+            g2.drawString("GAME OVER", x, y);
+        }
+
+        x = 35;
+        y = top_y + 320;
+        g2.setColor(Color.white);
+        g2.setFont(new Font("Times New Roman", Font.ITALIC, 60));
+        g2.drawString("TETRIS", x, y);
     }
     private void drawGrid(Graphics2D g2) {
         int blockSize = Block.SIZE;

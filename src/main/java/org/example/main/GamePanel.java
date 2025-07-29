@@ -48,8 +48,10 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
     private void update() {
-
+    if (!pm.gameOver) {
         pm.update();
+    }
+
     }
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
